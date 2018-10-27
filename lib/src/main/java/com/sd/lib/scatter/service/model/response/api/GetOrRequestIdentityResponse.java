@@ -32,15 +32,15 @@ public class GetOrRequestIdentityResponse extends ApiResponse
 
     public static class Result implements JsonWriter
     {
-        private List<String> accounts;
-        private Map<String, String> mapAccounts = new HashMap<>(1);
+        private List<Account> accounts;
+        private Map<String, Account> mapAccounts = new HashMap<>(1);
 
-        public void setEosAccount(EosAccount account) throws JSONException
+        public void setEosAccount(EosAccount account)
         {
-            final JSONObject jsonObject = new JSONObject();
-            account.write(jsonObject);
+            if (account == null)
+                return;
 
-            this.mapAccounts.put(account.getBlockchain(), jsonObject.toString());
+            this.mapAccounts.put(account.getBlockchain(), account);
             this.accounts = new ArrayList<>(mapAccounts.values());
         }
 
@@ -51,32 +51,50 @@ public class GetOrRequestIdentityResponse extends ApiResponse
                 return;
 
             final JSONArray jsonArray = new JSONArray();
-            for (String item : accounts)
+            for (Account item : accounts)
             {
-                jsonArray.put(item);
+                final JSONObject itemObject = new JSONObject();
+                item.write(itemObject);
+                jsonArray.put(itemObject);
             }
 
             object.put("accounts", accounts);
         }
     }
 
-    public static class EosAccount implements JsonWriter
+    private static class Account implements JsonWriter
     {
-        private final String blockchain = "eos";
+        private final String blockchain;
+
+        public Account(String blockchain)
+        {
+            this.blockchain = blockchain;
+        }
+
+        @Override
+        public void write(JSONObject object) throws JSONException
+        {
+            object.put("blockchain", blockchain);
+        }
+
+        public String getBlockchain()
+        {
+            return blockchain;
+        }
+    }
+
+    public static class EosAccount extends Account
+    {
         private final String name;
         private final String authority;
         private final String publicKey;
 
         public EosAccount(String name, String authority, String publicKey)
         {
+            super("eos");
             this.name = name;
             this.authority = authority;
             this.publicKey = publicKey;
-        }
-
-        public String getBlockchain()
-        {
-            return blockchain;
         }
 
         public String getName()
@@ -97,7 +115,7 @@ public class GetOrRequestIdentityResponse extends ApiResponse
         @Override
         public void write(JSONObject object) throws JSONException
         {
-            object.put("blockchain", blockchain);
+            super.write(object);
             object.put("name", name);
             object.put("authority", authority);
             object.put("publicKey", publicKey);

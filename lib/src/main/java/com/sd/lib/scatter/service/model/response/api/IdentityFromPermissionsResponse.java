@@ -1,5 +1,8 @@
 package com.sd.lib.scatter.service.model.response.api;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class IdentityFromPermissionsResponse extends ApiResponse
 {
     private String result;
@@ -17,5 +20,12 @@ public class IdentityFromPermissionsResponse extends ApiResponse
     public void setResult(String result)
     {
         this.result = result;
+    }
+
+    @Override
+    public void write(JSONObject object) throws JSONException
+    {
+        super.write(object);
+        object.put("result", result);
     }
 }

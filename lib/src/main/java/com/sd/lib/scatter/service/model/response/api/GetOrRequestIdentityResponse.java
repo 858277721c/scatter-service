@@ -1,7 +1,10 @@
 package com.sd.lib.scatter.service.model.response.api;
 
-import com.sd.lib.scatter.service.exception.JsonException;
-import com.sd.lib.scatter.service.utils.JsonUtils;
+import com.sd.lib.scatter.service.json.JsonWriter;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,34 +30,37 @@ public class GetOrRequestIdentityResponse extends ApiResponse
         this.result = result;
     }
 
-    public static class Result
+    public static class Result implements JsonWriter
     {
         private List<String> accounts;
-        private Map<String, String> mapAccounts;
+        private Map<String, String> mapAccounts = new HashMap<>(1);
 
-        private Map<String, String> getMapAccounts()
+        public void setEosAccount(EosAccount account) throws JSONException
         {
-            if (mapAccounts == null)
-                mapAccounts = new HashMap<>(1);
-            return mapAccounts;
+            final JSONObject jsonObject = new JSONObject();
+            account.write(jsonObject);
+
+            this.mapAccounts.put(account.getBlockchain(), jsonObject.toString());
+            this.accounts = new ArrayList<>(mapAccounts.values());
         }
 
-        public void setEosAccount(EosAccount account) throws JsonException
+        @Override
+        public void write(JSONObject object) throws JSONException
         {
-            try
+            if (accounts == null || accounts.isEmpty())
+                return;
+
+            final JSONArray jsonArray = new JSONArray();
+            for (String item : accounts)
             {
-                final String json = JsonUtils.objectToJson(account);
-                final Map<String, String> mapAccounts = getMapAccounts();
-                mapAccounts.put(account.getBlockchain(), json);
-                this.accounts = new ArrayList<>(mapAccounts.values());
-            } catch (Exception e)
-            {
-                throw new JsonException(e);
+                jsonArray.put(item);
             }
+
+            object.put("accounts", accounts);
         }
     }
 
-    public static class EosAccount
+    public static class EosAccount implements JsonWriter
     {
         private final String blockchain = "eos";
         private final String name;
@@ -87,5 +93,23 @@ public class GetOrRequestIdentityResponse extends ApiResponse
         {
             return publicKey;
         }
+
+        @Override
+        public void write(JSONObject object) throws JSONException
+        {
+            object.put("blockchain", blockchain);
+            object.put("name", name);
+            object.put("authority", authority);
+            object.put("publicKey", publicKey);
+        }
+    }
+
+    @Override
+    public void write(JSONObject object) throws JSONException
+    {
+        super.write(object);
+        final JSONObject jsonResult = new JSONObject();
+        getResult().write(jsonResult);
+        object.put("result", jsonResult);
     }
 }

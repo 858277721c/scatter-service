@@ -9,7 +9,6 @@ import com.sd.lib.scatter.service.model.request.api.IdentityFromPermissionsData;
 import com.sd.lib.scatter.service.model.response.api.ApiResponse;
 import com.sd.lib.scatter.service.model.response.api.GetOrRequestIdentityResponse;
 import com.sd.lib.scatter.service.model.response.api.IdentityFromPermissionsResponse;
-import com.sd.lib.scatter.service.utils.JsonUtils;
 
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
@@ -105,7 +104,11 @@ public abstract class ScatterWebSocketServer extends WebSocketServer
     {
         try
         {
-            final ApiData apiData = JsonUtils.jsonToObject(json, ApiData.class);
+            final JSONObject jsonObject = new JSONObject(json);
+
+            final ApiData apiData = new ApiData();
+            apiData.read(jsonObject);
+
             final String id = apiData.getId();
             if (id == null || id.isEmpty())
             {
@@ -124,17 +127,21 @@ public abstract class ScatterWebSocketServer extends WebSocketServer
             switch (apiType)
             {
                 case IdentityFromPermissions:
-                    onApiTypeIdentityFromPermissions(JsonUtils.jsonToObject(json, IdentityFromPermissionsData.class), socket);
+                    final IdentityFromPermissionsData identityFromPermissionsData = new IdentityFromPermissionsData();
+                    identityFromPermissionsData.read(jsonObject);
+                    onApiTypeIdentityFromPermissions(identityFromPermissionsData, socket);
                     break;
                 case GetOrRequestIdentity:
-                    onApiTypeGetOrRequestIdentity(JsonUtils.jsonToObject(json, GetOrRequestIdentityData.class), socket);
+                    final GetOrRequestIdentityData getOrRequestIdentityData = new GetOrRequestIdentityData();
+                    getOrRequestIdentityData.read(jsonObject);
+                    onApiTypeGetOrRequestIdentity(getOrRequestIdentityData, socket);
                     break;
                 default:
                     break;
             }
-        } catch (JsonException e)
+        } catch (JSONException e)
         {
-            onDataError(new RuntimeException("parse api data error:" + e));
+            onDataError(new JsonException("parse api data error:" + e));
         }
     }
 
@@ -147,7 +154,7 @@ public abstract class ScatterWebSocketServer extends WebSocketServer
             response.setResult(id);
 
             new ApiResponser(socket).send(response);
-        } catch (JsonException e)
+        } catch (JSONException e)
         {
             onDataError(new RuntimeException("identityFromPermissions response error:" + e));
         }
@@ -174,7 +181,7 @@ public abstract class ScatterWebSocketServer extends WebSocketServer
             response.setResult(result);
 
             new ApiResponser(socket).send(response);
-        } catch (JsonException e)
+        } catch (JSONException e)
         {
             onDataError(new RuntimeException("getOrRequestIdentity response error:" + e));
         }
@@ -199,9 +206,12 @@ public abstract class ScatterWebSocketServer extends WebSocketServer
             mSocket = socket;
         }
 
-        public void send(ApiResponse response) throws JsonException
+        public void send(ApiResponse response) throws JSONException
         {
-            final String json = JsonUtils.objectToJson(response);
+            final JSONObject jsonObject = new JSONObject();
+            response.write(jsonObject);
+
+            final String json = jsonObject.toString();
             final String responseString = Scatterio.toResponse(json, Scatterio.DataType.Api);
             sendResponse(responseString, mSocket);
         }

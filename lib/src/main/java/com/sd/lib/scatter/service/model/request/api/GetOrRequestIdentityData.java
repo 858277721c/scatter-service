@@ -1,10 +1,10 @@
 package com.sd.lib.scatter.service.model.request.api;
 
-import com.google.gson.Gson;
+import com.sd.lib.scatter.service.json.JsonReader;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.List;
 
 public class GetOrRequestIdentityData extends ApiData
 {
@@ -20,7 +20,7 @@ public class GetOrRequestIdentityData extends ApiData
         this.payload = payload;
     }
 
-    public static class Payload
+    public static class Payload implements JsonReader
     {
         private Fields fields;
 
@@ -33,51 +33,49 @@ public class GetOrRequestIdentityData extends ApiData
         {
             this.fields = fields;
         }
+
+        @Override
+        public void read(JSONObject object) throws JSONException
+        {
+            final Fields fields = new Fields();
+            fields.read(object.getJSONObject("fields"));
+            setFields(fields);
+        }
     }
 
-    public static class Fields
+    public static class Fields implements JsonReader
     {
-        private List<String> accounts;
-
-        public List<String> getAccounts()
-        {
-            return accounts;
-        }
-
-        public void setAccounts(List<String> accounts)
-        {
-            this.accounts = accounts;
-        }
+        private EosAccount eosAccount;
 
         public EosAccount getEosAccount()
         {
-            if (accounts == null || accounts.isEmpty())
-                return null;
+            return this.eosAccount;
+        }
 
-            try
+        @Override
+        public void read(JSONObject object) throws JSONException
+        {
+            final JSONArray accounts = object.getJSONArray("accounts");
+            for (int i = 0; i < accounts.length(); i++)
             {
-                for (String item : accounts)
+                final JSONObject item = accounts.getJSONObject(i);
+                if ("eos".equals(item.getString("blockchain")))
                 {
-                    final JSONObject jsonItem = new JSONObject(item);
-                    final String blockchain = jsonItem.optString("blockchain");
-                    if ("eos".equals(blockchain))
-                    {
-                        return new Gson().fromJson(item, EosAccount.class);
-                    }
+                    final EosAccount account = new EosAccount();
+                    account.read(item);
+                    this.eosAccount = account;
+                    break;
                 }
-            } catch (Exception e)
-            {
             }
-            return null;
         }
     }
 
-    public static class EosAccount
+    public static class EosAccount implements JsonReader
     {
         private String blockchain;
         private String protocol;
         private String host;
-        private int port;
+        private String port;
         private String chainId;
 
         public String getBlockchain()
@@ -110,12 +108,12 @@ public class GetOrRequestIdentityData extends ApiData
             this.host = host;
         }
 
-        public int getPort()
+        public String getPort()
         {
             return port;
         }
 
-        public void setPort(int port)
+        public void setPort(String port)
         {
             this.port = port;
         }
@@ -129,5 +127,24 @@ public class GetOrRequestIdentityData extends ApiData
         {
             this.chainId = chainId;
         }
+
+        @Override
+        public void read(JSONObject object) throws JSONException
+        {
+            this.blockchain = object.getString("blockchain");
+            this.protocol = object.getString("protocol");
+            this.host = object.getString("host");
+            this.port = object.getString("port");
+            this.chainId = object.getString("chainId");
+        }
+    }
+
+    @Override
+    public void read(JSONObject object) throws JSONException
+    {
+        super.read(object);
+        final Payload payload = new Payload();
+        payload.read(object.getJSONObject("payload"));
+        setPayload(payload);
     }
 }

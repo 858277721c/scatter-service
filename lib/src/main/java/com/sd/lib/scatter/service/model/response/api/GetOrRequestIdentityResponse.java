@@ -58,7 +58,7 @@ public class GetOrRequestIdentityResponse extends ApiResponse
                 jsonArray.put(itemObject);
             }
 
-            object.put("accounts", accounts);
+            object.put("accounts", jsonArray);
         }
     }
 

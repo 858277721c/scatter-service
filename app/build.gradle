@@ -24,5 +24,5 @@ dependencies {
     implementation 'com.github.zj565061763:webview:1.1.0'
     implementation 'com.github.zj565061763:task:1.1.0'
 
-    implementation 'com.github.zj565061763:eosrpc:d202b6f59a'
+    implementation 'com.github.zj565061763:eosrpc:4aa36563f0'
 }

@@ -15,6 +15,7 @@ import com.sd.lib.eos.rpc.core.output.model.ActionModel;
 import com.sd.lib.eos.rpc.core.output.model.AuthorizationModel;
 import com.sd.lib.eos.rpc.core.output.model.TransactionModel;
 import com.sd.lib.eos.rpc.core.output.model.TransactionSignResult;
+import com.sd.lib.eos.rpc.utils.RpcUtils;
 import com.sd.lib.scatter.service.ScatterWebSocketServer;
 import com.sd.lib.scatter.service.model.eos.EosAction;
 import com.sd.lib.scatter.service.model.eos.EosAuthorization;
@@ -84,7 +85,8 @@ public class MainActivity extends AppCompatActivity
                 protected String pushEosTransaction(EosTransaction transaction, EosNetwork network)
                 {
                     final TransactionModel model = toTransactionModel(transaction);
-                    final TransactionSignResult signResult = FEOSManager.getInstance().getTransactionSigner().signTransaction(model, network.getChainId(), "");
+                    final TransactionSignResult signResult = FEOSManager.getInstance().getTransactionSigner().signTransaction(model, network.getChainId(),
+                            "");
 
                     try
                     {
@@ -117,7 +119,7 @@ public class MainActivity extends AppCompatActivity
     private TransactionModel toTransactionModel(EosTransaction transaction)
     {
         final TransactionModel model = new TransactionModel();
-        model.setExpiration(transaction.getExpiration());
+        model.setExpiration(RpcUtils.addTime(transaction.getExpiration(), 30 * 1000));
         model.setRef_block_num(transaction.getRef_block_num());
         model.setRef_block_prefix(transaction.getRef_block_prefix());
 
@@ -135,6 +137,7 @@ public class MainActivity extends AppCompatActivity
                 final AuthorizationModel authorizationModel = new AuthorizationModel();
                 authorizationModel.setActor(eosAuthorization.getActor());
                 authorizationModel.setPermission(eosAuthorization.getPermission());
+                listAuthor.add(authorizationModel);
             }
             actionModel.setAuthorization(listAuthor);
 

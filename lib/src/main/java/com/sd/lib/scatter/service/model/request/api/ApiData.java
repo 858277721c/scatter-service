@@ -18,19 +18,9 @@ public class ApiData implements JsonReader
         return type;
     }
 
-    public void setType(String type)
-    {
-        this.type = type;
-    }
-
     public String getId()
     {
         return id;
-    }
-
-    public void setId(String id)
-    {
-        this.id = id;
     }
 
     public String getAppkey()
@@ -38,29 +28,14 @@ public class ApiData implements JsonReader
         return appkey;
     }
 
-    public void setAppkey(String appkey)
-    {
-        this.appkey = appkey;
-    }
-
     public String getNonce()
     {
         return nonce;
     }
 
-    public void setNonce(String nonce)
-    {
-        this.nonce = nonce;
-    }
-
     public String getNextNonce()
     {
         return nextNonce;
-    }
-
-    public void setNextNonce(String nextNonce)
-    {
-        this.nextNonce = nextNonce;
     }
 
     @Override

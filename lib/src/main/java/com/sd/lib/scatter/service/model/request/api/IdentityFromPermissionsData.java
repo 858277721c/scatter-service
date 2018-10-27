@@ -14,11 +14,6 @@ public class IdentityFromPermissionsData extends ApiData
         return payload;
     }
 
-    public void setPayload(Payload payload)
-    {
-        this.payload = payload;
-    }
-
     public static class Payload implements JsonReader
     {
         private String origin;
@@ -26,11 +21,6 @@ public class IdentityFromPermissionsData extends ApiData
         public String getOrigin()
         {
             return origin;
-        }
-
-        public void setOrigin(String origin)
-        {
-            this.origin = origin;
         }
 
         @Override
@@ -44,8 +34,13 @@ public class IdentityFromPermissionsData extends ApiData
     public void read(JSONObject object) throws JSONException
     {
         super.read(object);
-        final Payload payload = new Payload();
-        payload.read(object.optJSONObject("payload"));
-        setPayload(payload);
+
+        final JSONObject jsonPayload = object.optJSONObject("payload");
+        if (jsonPayload != null)
+        {
+            final Payload payload = new Payload();
+            payload.read(jsonPayload);
+            this.payload = payload;
+        }
     }
 }

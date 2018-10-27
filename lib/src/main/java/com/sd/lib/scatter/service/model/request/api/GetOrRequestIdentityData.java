@@ -1,6 +1,7 @@
 package com.sd.lib.scatter.service.model.request.api;
 
 import com.sd.lib.scatter.service.json.JsonReader;
+import com.sd.lib.scatter.service.model.BlockChain;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -15,11 +16,6 @@ public class GetOrRequestIdentityData extends ApiData
         return payload;
     }
 
-    public void setPayload(Payload payload)
-    {
-        this.payload = payload;
-    }
-
     public static class Payload implements JsonReader
     {
         private Fields fields;
@@ -29,17 +25,16 @@ public class GetOrRequestIdentityData extends ApiData
             return fields;
         }
 
-        public void setFields(Fields fields)
-        {
-            this.fields = fields;
-        }
-
         @Override
         public void read(JSONObject object) throws JSONException
         {
-            final Fields fields = new Fields();
-            fields.read(object.getJSONObject("fields"));
-            setFields(fields);
+            final JSONObject jsonFields = object.optJSONObject("fields");
+            if (jsonFields != null)
+            {
+                final Fields fields = new Fields();
+                fields.read(jsonFields);
+                this.fields = fields;
+            }
         }
     }
 
@@ -76,23 +71,7 @@ public class GetOrRequestIdentityData extends ApiData
         }
     }
 
-    private static class Account implements JsonReader
-    {
-        private String blockchain;
-
-        public String getBlockchain()
-        {
-            return blockchain;
-        }
-
-        @Override
-        public void read(JSONObject object) throws JSONException
-        {
-            this.blockchain = object.optString("blockchain");
-        }
-    }
-
-    public static class EosAccount extends Account
+    public static class EosAccount extends BlockChain
     {
         private String protocol;
         private String host;
@@ -134,8 +113,13 @@ public class GetOrRequestIdentityData extends ApiData
     public void read(JSONObject object) throws JSONException
     {
         super.read(object);
-        final Payload payload = new Payload();
-        payload.read(object.getJSONObject("payload"));
-        setPayload(payload);
+
+        final JSONObject jsonPayload = object.optJSONObject("payload");
+        if (jsonPayload != null)
+        {
+            final Payload payload = new Payload();
+            payload.read(jsonPayload);
+            this.payload = payload;
+        }
     }
 }

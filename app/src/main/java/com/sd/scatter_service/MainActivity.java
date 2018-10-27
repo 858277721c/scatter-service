@@ -8,6 +8,8 @@ import android.webkit.SslErrorHandler;
 import android.webkit.WebView;
 
 import com.sd.lib.scatter.service.ScatterWebSocketServer;
+import com.sd.lib.scatter.service.model.eos.EosNetwork;
+import com.sd.lib.scatter.service.model.eos.EosTransaction;
 import com.sd.lib.scatter.service.model.response.api.GetOrRequestIdentityResponse;
 import com.sd.lib.webview.FWebView;
 import com.sd.lib.webview.client.FWebViewClient;
@@ -63,6 +65,12 @@ public class MainActivity extends AppCompatActivity
                 protected GetOrRequestIdentityResponse.EosAccount getEosAccount()
                 {
                     return new GetOrRequestIdentityResponse.EosAccount("zjunzjun1234", "active", "EOS76weabiGCBEMemk4nnJRMTPyshEzNBqoYKCWfnMzpVqMauTYCY");
+                }
+
+                @Override
+                protected void pushEosTransaction(EosTransaction transaction, EosNetwork network)
+                {
+
                 }
 
                 @Override

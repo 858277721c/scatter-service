@@ -3,6 +3,8 @@ package com.sd.lib.scatter.service;
 import android.util.Log;
 
 import com.sd.lib.scatter.service.exception.JsonException;
+import com.sd.lib.scatter.service.model.eos.EosNetwork;
+import com.sd.lib.scatter.service.model.eos.EosTransaction;
 import com.sd.lib.scatter.service.model.request.api.ApiData;
 import com.sd.lib.scatter.service.model.request.api.GetOrRequestIdentityData;
 import com.sd.lib.scatter.service.model.request.api.IdentityFromPermissionsData;
@@ -199,6 +201,8 @@ public abstract class ScatterWebSocketServer extends WebSocketServer
     }
 
     protected abstract GetOrRequestIdentityResponse.EosAccount getEosAccount();
+
+    protected abstract void pushEosTransaction(EosTransaction transaction, EosNetwork network);
 
     protected abstract void onDataError(Exception e);
 

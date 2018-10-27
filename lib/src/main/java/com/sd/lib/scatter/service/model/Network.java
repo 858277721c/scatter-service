@@ -9,6 +9,11 @@ public class Network extends BlockChain
     private String host;
     private String port;
 
+    public String getUrl()
+    {
+        return protocol + "://" + host + ":" + port;
+    }
+
     public String getProtocol()
     {
         return protocol;

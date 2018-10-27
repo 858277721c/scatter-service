@@ -91,10 +91,11 @@ public class Scatterio
             if (name == null || name.isEmpty())
                 return null;
 
-            if (Pair.name.equals(name))
-                return Pair;
-            else if (Api.name.equals(name))
-                return Api;
+            for (DataType item : DataType.values())
+            {
+                if (item.name.equals(name))
+                    return item;
+            }
 
             return null;
         }
@@ -124,12 +125,11 @@ public class Scatterio
             if (name == null || name.isEmpty())
                 return null;
 
-            if (IdentityFromPermissions.name.equals(name))
-                return IdentityFromPermissions;
-            else if (GetOrRequestIdentity.name.equals(name))
-                return GetOrRequestIdentity;
-            else if (RequestSignature.name.equals(name))
-                return RequestSignature;
+            for (ApiType item : ApiType.values())
+            {
+                if (item.name.equals(name))
+                    return item;
+            }
 
             return null;
         }

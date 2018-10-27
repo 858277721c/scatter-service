@@ -55,47 +55,53 @@ public class GetOrRequestIdentityData extends ApiData
         @Override
         public void read(JSONObject object) throws JSONException
         {
-            final JSONArray accounts = object.getJSONArray("accounts");
-            for (int i = 0; i < accounts.length(); i++)
+            final JSONArray jsonArray = object.optJSONArray("accounts");
+            if (jsonArray != null)
             {
-                final JSONObject item = accounts.getJSONObject(i);
-                if ("eos".equals(item.getString("blockchain")))
+                for (int i = 0; i < jsonArray.length(); i++)
                 {
-                    final EosAccount account = new EosAccount();
-                    account.read(item);
-                    this.eosAccount = account;
-                    break;
+                    final JSONObject item = jsonArray.optJSONObject(i);
+                    if (item == null)
+                        continue;
+
+                    if ("eos".equals(item.optString("blockchain")))
+                    {
+                        final EosAccount account = new EosAccount();
+                        account.read(item);
+                        this.eosAccount = account;
+                        break;
+                    }
                 }
             }
         }
     }
 
-    public static class EosAccount implements JsonReader
+    private static class Account implements JsonReader
     {
         private String blockchain;
-        private String protocol;
-        private String host;
-        private String port;
-        private String chainId;
 
         public String getBlockchain()
         {
             return blockchain;
         }
 
-        public void setBlockchain(String blockchain)
+        @Override
+        public void read(JSONObject object) throws JSONException
         {
-            this.blockchain = blockchain;
+            this.blockchain = object.optString("blockchain");
         }
+    }
+
+    public static class EosAccount extends Account
+    {
+        private String protocol;
+        private String host;
+        private String port;
+        private String chainId;
 
         public String getProtocol()
         {
             return protocol;
-        }
-
-        public void setProtocol(String protocol)
-        {
-            this.protocol = protocol;
         }
 
         public String getHost()
@@ -103,19 +109,9 @@ public class GetOrRequestIdentityData extends ApiData
             return host;
         }
 
-        public void setHost(String host)
-        {
-            this.host = host;
-        }
-
         public String getPort()
         {
             return port;
-        }
-
-        public void setPort(String port)
-        {
-            this.port = port;
         }
 
         public String getChainId()
@@ -123,19 +119,14 @@ public class GetOrRequestIdentityData extends ApiData
             return chainId;
         }
 
-        public void setChainId(String chainId)
-        {
-            this.chainId = chainId;
-        }
-
         @Override
         public void read(JSONObject object) throws JSONException
         {
-            this.blockchain = object.getString("blockchain");
-            this.protocol = object.getString("protocol");
-            this.host = object.getString("host");
-            this.port = object.getString("port");
-            this.chainId = object.getString("chainId");
+            super.read(object);
+            this.protocol = object.optString("protocol");
+            this.host = object.optString("host");
+            this.port = object.optString("port");
+            this.chainId = object.optString("chainId");
         }
     }
 

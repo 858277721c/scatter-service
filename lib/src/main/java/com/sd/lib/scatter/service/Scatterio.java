@@ -109,7 +109,8 @@ public class Scatterio
     public enum ApiType
     {
         IdentityFromPermissions("identityFromPermissions"),
-        GetOrRequestIdentity("getOrRequestIdentity");
+        GetOrRequestIdentity("getOrRequestIdentity"),
+        RequestSignature("requestSignature");
 
         public final String name;
 
@@ -127,6 +128,8 @@ public class Scatterio
                 return IdentityFromPermissions;
             else if (GetOrRequestIdentity.name.equals(name))
                 return GetOrRequestIdentity;
+            else if (RequestSignature.name.equals(name))
+                return RequestSignature;
 
             return null;
         }

@@ -6,6 +6,7 @@ import com.sd.lib.scatter.service.exception.JsonException;
 import com.sd.lib.scatter.service.model.request.api.ApiData;
 import com.sd.lib.scatter.service.model.request.api.GetOrRequestIdentityData;
 import com.sd.lib.scatter.service.model.request.api.IdentityFromPermissionsData;
+import com.sd.lib.scatter.service.model.request.api.RequestSignatureData;
 import com.sd.lib.scatter.service.model.response.api.ApiResponse;
 import com.sd.lib.scatter.service.model.response.api.GetOrRequestIdentityResponse;
 import com.sd.lib.scatter.service.model.response.api.IdentityFromPermissionsResponse;
@@ -136,6 +137,11 @@ public abstract class ScatterWebSocketServer extends WebSocketServer
                     getOrRequestIdentityData.read(jsonObject);
                     onApiTypeGetOrRequestIdentity(getOrRequestIdentityData, socket);
                     break;
+                case RequestSignature:
+                    final RequestSignatureData requestSignatureData = new RequestSignatureData();
+                    requestSignatureData.read(jsonObject);
+                    onApiTypeRequestSignature(requestSignatureData, socket);
+                    break;
                 default:
                     break;
             }
@@ -185,6 +191,11 @@ public abstract class ScatterWebSocketServer extends WebSocketServer
         {
             onDataError(new RuntimeException("getOrRequestIdentity response error:" + e));
         }
+    }
+
+    private void onApiTypeRequestSignature(RequestSignatureData data, WebSocket socket)
+    {
+
     }
 
     protected abstract GetOrRequestIdentityResponse.EosAccount getEosAccount();

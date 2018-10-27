@@ -66,8 +66,8 @@ public class ApiData implements JsonReader
     @Override
     public void read(JSONObject object) throws JSONException
     {
-        this.type = object.getString("type");
-        this.id = object.getString("id");
+        this.type = object.optString("type");
+        this.id = object.optString("id");
         this.appkey = object.optString("appkey");
         this.nonce = object.optString("nonce");
         this.nextNonce = object.optString("nextNonce");

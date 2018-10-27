@@ -1,52 +1,79 @@
 package com.sd.lib.scatter.service.model.request.api;
 
-import com.sd.lib.scatter.service.json.JsonReader;
+import com.sd.lib.scatter.service.model.BlockChain;
+import com.sd.lib.scatter.service.model.eos.EosNetwork;
+import com.sd.lib.scatter.service.model.eos.EosTransaction;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 public class RequestSignatureData extends ApiData
 {
-    private Payload payload;
+    private EosPayload eosPayload;
 
-    public Payload getPayload()
+    public EosPayload getEosPayload()
     {
-        return payload;
+        return eosPayload;
     }
 
-    public void setPayload(Payload payload)
+    private static class Payload extends BlockChain
     {
-        this.payload = payload;
     }
 
-    private static class Payload implements JsonReader
+    public static class EosPayload extends Payload
     {
-        private String blockchain;
+        private EosTransaction transaction;
+        private EosNetwork network;
 
-        public String getBlockchain()
+        public EosTransaction getTransaction()
         {
-            return blockchain;
+            return transaction;
+        }
+
+        public EosNetwork getNetwork()
+        {
+            return network;
         }
 
         @Override
         public void read(JSONObject object) throws JSONException
         {
-            this.blockchain = object.getString("blockchain");
+            super.read(object);
+
+            final JSONObject jsonTransaction = object.optJSONObject("transaction");
+            if (jsonTransaction != null)
+            {
+                final EosTransaction transaction = new EosTransaction();
+                transaction.read(jsonTransaction);
+                this.transaction = transaction;
+            }
+
+            final JSONObject jsonNetwrok = object.optJSONObject("network");
+            if (jsonNetwrok != null)
+            {
+                final EosNetwork network = new EosNetwork();
+                network.read(jsonNetwrok);
+                this.network = network;
+            }
         }
     }
-
-    public static class EosPayload extends Payload
-    {
-
-    }
-
 
     @Override
     public void read(JSONObject object) throws JSONException
     {
         super.read(object);
-        final Payload payload = new Payload();
-        payload.read(object.getJSONObject("payload"));
-        setPayload(payload);
+
+        final JSONObject jsonPayload = object.optJSONObject("payload");
+        if (jsonPayload != null)
+        {
+            final Payload payload = new Payload();
+            payload.read(jsonPayload);
+            if ("eos".equals(payload.getBlockchain()))
+            {
+                final EosPayload eosPayload = new EosPayload();
+                eosPayload.read(jsonPayload);
+                this.eosPayload = eosPayload;
+            }
+        }
     }
 }

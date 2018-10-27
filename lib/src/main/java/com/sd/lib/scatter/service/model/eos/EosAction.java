@@ -9,11 +9,11 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Action implements JsonReader
+public class EosAction implements JsonReader
 {
     private String account;
     private String name;
-    private List<Authorization> authorization;
+    private List<EosAuthorization> authorization;
     private String data;
 
     public String getAccount()
@@ -26,7 +26,7 @@ public class Action implements JsonReader
         return name;
     }
 
-    public List<Authorization> getAuthorization()
+    public List<EosAuthorization> getAuthorization()
     {
         return authorization;
     }
@@ -46,13 +46,13 @@ public class Action implements JsonReader
         final JSONArray jsonArray = object.optJSONArray("authorization");
         if (jsonArray != null)
         {
-            final List<Authorization> list = new ArrayList<>(1);
+            final List<EosAuthorization> list = new ArrayList<>(1);
             for (int i = 0; i < jsonArray.length(); i++)
             {
                 final JSONObject item = jsonArray.optJSONObject(i);
                 if (item != null)
                 {
-                    final Authorization authorization = new Authorization();
+                    final EosAuthorization authorization = new EosAuthorization();
                     authorization.read(item);
                     list.add(authorization);
                 }

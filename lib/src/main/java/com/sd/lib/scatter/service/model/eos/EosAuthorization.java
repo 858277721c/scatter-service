@@ -5,7 +5,7 @@ import com.sd.lib.scatter.service.json.JsonReader;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class Authorization implements JsonReader
+public class EosAuthorization implements JsonReader
 {
     private String actor;
     private String permission;

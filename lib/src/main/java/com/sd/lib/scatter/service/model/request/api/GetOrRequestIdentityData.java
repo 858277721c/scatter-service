@@ -71,7 +71,11 @@ public class GetOrRequestIdentityData extends ApiData
         }
     }
 
-    public static class EosAccount extends BlockChain
+    private static class Account extends BlockChain
+    {
+    }
+
+    public static class EosAccount extends Account
     {
         private String protocol;
         private String host;

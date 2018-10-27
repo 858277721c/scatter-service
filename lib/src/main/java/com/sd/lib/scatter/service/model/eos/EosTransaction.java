@@ -9,7 +9,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Transaction implements JsonReader
+public class EosTransaction implements JsonReader
 {
     private String expiration;
     private long ref_block_num;
@@ -17,7 +17,7 @@ public class Transaction implements JsonReader
     private long max_net_usage_words;
     private long max_cpu_usage_ms;
     private long delay_sec;
-    private List<Action> actions;
+    private List<EosAction> actions;
 
     public String getExpiration()
     {
@@ -49,7 +49,7 @@ public class Transaction implements JsonReader
         return delay_sec;
     }
 
-    public List<Action> getActions()
+    public List<EosAction> getActions()
     {
         return actions;
     }
@@ -67,14 +67,14 @@ public class Transaction implements JsonReader
         final JSONArray jsonArray = object.optJSONArray("actions");
         if (jsonArray != null)
         {
-            final List<Action> list = new ArrayList<>(1);
+            final List<EosAction> list = new ArrayList<>(1);
             for (int i = 0; i < jsonArray.length(); i++)
             {
                 final JSONObject item = jsonArray.optJSONObject(i);
                 if (item == null)
                     continue;
 
-                final Action action = new Action();
+                final EosAction action = new EosAction();
                 action.read(item);
                 list.add(action);
             }

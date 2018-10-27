@@ -1,6 +1,4 @@
-package com.sd.lib.scatter.service.model.eos;
-
-import com.sd.lib.scatter.service.model.BlockChain;
+package com.sd.lib.scatter.service.model;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -10,7 +8,6 @@ public class Network extends BlockChain
     private String protocol;
     private String host;
     private String port;
-    private String chainId;
 
     public String getProtocol()
     {
@@ -27,11 +24,6 @@ public class Network extends BlockChain
         return port;
     }
 
-    public String getChainId()
-    {
-        return chainId;
-    }
-
     @Override
     public void read(JSONObject object) throws JSONException
     {
@@ -39,6 +31,5 @@ public class Network extends BlockChain
         this.protocol = object.optString("protocol");
         this.host = object.optString("host");
         this.port = object.optString("port");
-        this.chainId = object.optString("chainId");
     }
 }

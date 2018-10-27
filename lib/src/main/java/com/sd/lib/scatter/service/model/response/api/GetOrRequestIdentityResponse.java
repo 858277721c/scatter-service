@@ -11,23 +11,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class GetOrRequestIdentityResponse extends ApiResponse
+public class GetOrRequestIdentityResponse extends ApiResponse<GetOrRequestIdentityResponse.Result>
 {
-    private Result result;
-
     public GetOrRequestIdentityResponse(String id)
     {
         super(id);
-    }
-
-    public Result getResult()
-    {
-        return result;
-    }
-
-    public void setResult(Result result)
-    {
-        this.result = result;
     }
 
     public static class Result implements JsonWriter

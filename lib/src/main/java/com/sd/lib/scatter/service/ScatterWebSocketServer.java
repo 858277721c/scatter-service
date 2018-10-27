@@ -12,6 +12,7 @@ import com.sd.lib.scatter.service.model.request.api.RequestSignatureData;
 import com.sd.lib.scatter.service.model.response.api.ApiResponse;
 import com.sd.lib.scatter.service.model.response.api.GetOrRequestIdentityResponse;
 import com.sd.lib.scatter.service.model.response.api.IdentityFromPermissionsResponse;
+import com.sd.lib.scatter.service.model.response.api.RequestSignatureResponse;
 
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
@@ -155,54 +156,66 @@ public abstract class ScatterWebSocketServer extends WebSocketServer
 
     private void onApiTypeIdentityFromPermissions(IdentityFromPermissionsData data, WebSocket socket)
     {
+        final String id = data.getId();
+        final IdentityFromPermissionsResponse response = new IdentityFromPermissionsResponse(id);
+        response.setResult(id);
+
         try
         {
-            final String id = data.getId();
-            final IdentityFromPermissionsResponse response = new IdentityFromPermissionsResponse(id);
-            response.setResult(id);
-
             new ApiResponser(socket).send(response);
         } catch (JSONException e)
         {
-            onDataError(new RuntimeException("identityFromPermissions response error:" + e));
+            onDataError(new JsonException("identityFromPermissions response error:" + e));
         }
     }
 
     private void onApiTypeGetOrRequestIdentity(GetOrRequestIdentityData data, WebSocket socket)
     {
+        final GetOrRequestIdentityData.EosAccount eosAccount = data.getPayload().getFields().getEosAccount();
+        if (eosAccount == null)
+        {
+            onDataError(new RuntimeException("eos block chain was not found in scatter request"));
+            return;
+        }
+
+        final GetOrRequestIdentityResponse.EosAccount account = getEosAccount();
+        if (account == null)
+            throw new NullPointerException("EosAccount is null for scatter api getOrRequestIdentity");
+
+        final GetOrRequestIdentityResponse response = new GetOrRequestIdentityResponse(data.getId());
+        final GetOrRequestIdentityResponse.Result result = new GetOrRequestIdentityResponse.Result();
+        result.setEosAccount(account);
+        response.setResult(result);
+
         try
         {
-            final GetOrRequestIdentityData.EosAccount eosAccount = data.getPayload().getFields().getEosAccount();
-            if (eosAccount == null)
-            {
-                onDataError(new RuntimeException("eos block chain was not found in scatter request"));
-                return;
-            }
-
-            final GetOrRequestIdentityResponse.EosAccount account = getEosAccount();
-            if (account == null)
-                throw new NullPointerException("EosAccount is null for scatter api getOrRequestIdentity");
-
-            final GetOrRequestIdentityResponse response = new GetOrRequestIdentityResponse(data.getId());
-            final GetOrRequestIdentityResponse.Result result = new GetOrRequestIdentityResponse.Result();
-            result.setEosAccount(account);
-            response.setResult(result);
-
             new ApiResponser(socket).send(response);
         } catch (JSONException e)
         {
-            onDataError(new RuntimeException("getOrRequestIdentity response error:" + e));
+            onDataError(new JsonException("getOrRequestIdentity response error:" + e));
         }
     }
 
     private void onApiTypeRequestSignature(RequestSignatureData data, WebSocket socket)
     {
+        final RequestSignatureData.EosPayload eosPayload = data.getEosPayload();
+        final String transaction_id = pushEosTransaction(eosPayload.getTransaction(), eosPayload.getNetwork());
 
+        final RequestSignatureResponse response = new RequestSignatureResponse(data.getId());
+        response.setResult(new RequestSignatureResponse.Result(transaction_id));
+
+        try
+        {
+            new ApiResponser(socket).send(response);
+        } catch (JSONException e)
+        {
+            onDataError(new JsonException("requestSignature response error:" + e));
+        }
     }
 
     protected abstract GetOrRequestIdentityResponse.EosAccount getEosAccount();
 
-    protected abstract void pushEosTransaction(EosTransaction transaction, EosNetwork network);
+    protected abstract String pushEosTransaction(EosTransaction transaction, EosNetwork network);
 
     protected abstract void onDataError(Exception e);
 

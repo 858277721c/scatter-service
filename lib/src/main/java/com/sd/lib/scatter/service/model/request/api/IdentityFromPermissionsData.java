@@ -20,7 +20,6 @@ public class IdentityFromPermissionsData extends ApiData
     public void read(JSONObject object) throws JSONException
     {
         super.read(object);
-
         final JSONObject jsonPayload = object.optJSONObject("payload");
         if (jsonPayload != null)
         {

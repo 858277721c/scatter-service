@@ -1,6 +1,5 @@
 package com.sd.lib.scatter.service.model.request.api;
 
-import com.sd.lib.scatter.service.model.BlockChain;
 import com.sd.lib.scatter.service.model.eos.EosNetwork;
 import com.sd.lib.scatter.service.model.eos.EosTransaction;
 
@@ -16,8 +15,20 @@ public class RequestSignatureData extends ApiData
         return eosPayload;
     }
 
-    private static class Payload extends BlockChain
+    private static class Payload extends ApiData.Payload
     {
+        private String blockchain;
+
+        public String getBlockchain()
+        {
+            return blockchain;
+        }
+
+        @Override
+        public void read(JSONObject object) throws JSONException
+        {
+            this.blockchain = object.optString("blockchain");
+        }
     }
 
     public static class EosPayload extends Payload
@@ -39,7 +50,6 @@ public class RequestSignatureData extends ApiData
         public void read(JSONObject object) throws JSONException
         {
             super.read(object);
-
             final JSONObject jsonTransaction = object.optJSONObject("transaction");
             if (jsonTransaction != null)
             {
@@ -60,7 +70,6 @@ public class RequestSignatureData extends ApiData
     public void read(JSONObject object) throws JSONException
     {
         super.read(object);
-
         final JSONObject jsonPayload = object.optJSONObject("payload");
         if (jsonPayload != null)
         {

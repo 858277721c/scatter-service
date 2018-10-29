@@ -88,15 +88,11 @@ public class Scatterio
 
         public static DataType from(String name)
         {
-            if (name == null || name.isEmpty())
-                return null;
-
             for (DataType item : DataType.values())
             {
                 if (item.name.equals(name))
                     return item;
             }
-
             return null;
         }
 
@@ -122,15 +118,11 @@ public class Scatterio
 
         public static ApiType from(String name)
         {
-            if (name == null || name.isEmpty())
-                return null;
-
             for (ApiType item : ApiType.values())
             {
                 if (item.name.equals(name))
                     return item;
             }
-
             return null;
         }
 

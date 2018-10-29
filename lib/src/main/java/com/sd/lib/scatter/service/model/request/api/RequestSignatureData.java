@@ -43,17 +43,15 @@ public class RequestSignatureData extends ApiData
             final JSONObject jsonTransaction = object.optJSONObject("transaction");
             if (jsonTransaction != null)
             {
-                final EosTransaction transaction = new EosTransaction();
-                transaction.read(jsonTransaction);
-                this.transaction = transaction;
+                this.transaction = new EosTransaction();
+                this.transaction.read(jsonTransaction);
             }
 
             final JSONObject jsonNetwrok = object.optJSONObject("network");
             if (jsonNetwrok != null)
             {
-                final EosNetwork network = new EosNetwork();
-                network.read(jsonNetwrok);
-                this.network = network;
+                this.network = new EosNetwork();
+                this.network.read(jsonNetwrok);
             }
         }
     }
@@ -71,9 +69,8 @@ public class RequestSignatureData extends ApiData
 
             if ("eos".equals(payload.getBlockchain()))
             {
-                final EosPayload eosPayload = new EosPayload();
-                eosPayload.read(jsonPayload);
-                this.eosPayload = eosPayload;
+                this.eosPayload = new EosPayload();
+                this.eosPayload.read(jsonPayload);
             }
         }
     }

@@ -7,9 +7,6 @@ import android.util.Log;
 import android.webkit.SslErrorHandler;
 import android.webkit.WebView;
 
-import com.sd.lib.eos.rpc.api.RpcApi;
-import com.sd.lib.eos.rpc.api.model.ApiResponse;
-import com.sd.lib.eos.rpc.api.model.PushTransactionResponse;
 import com.sd.lib.eos.rpc.core.FEOSManager;
 import com.sd.lib.eos.rpc.core.output.model.ActionModel;
 import com.sd.lib.eos.rpc.core.output.model.AuthorizationModel;
@@ -82,28 +79,13 @@ public class MainActivity extends AppCompatActivity
                 }
 
                 @Override
-                protected String pushEosTransaction(EosTransaction transaction, EosNetwork network)
+                protected List<String> signEosTransaction(EosTransaction transaction, EosNetwork network)
                 {
                     final TransactionModel model = toTransactionModel(transaction);
                     final TransactionSignResult signResult = FEOSManager.getInstance().getTransactionSigner().signTransaction(model, network.getChainId(),
                             "");
 
-                    try
-                    {
-                        final ApiResponse<PushTransactionResponse> apiResponse = new RpcApi(network.getUrl()).pushTransaction(signResult.getSignatures(),
-                                signResult.getCompression(),
-                                "",
-                                signResult.getPacked_trx());
-
-                        if (apiResponse.isSuccessful())
-                            return apiResponse.getSuccess().getTransaction_id();
-
-                    } catch (Exception e)
-                    {
-                        Log.e(TAG, String.valueOf(e));
-                    }
-
-                    return null;
+                    return signResult.getSignatures();
                 }
 
                 @Override

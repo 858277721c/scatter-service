@@ -23,6 +23,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.net.InetSocketAddress;
+import java.util.List;
 
 public abstract class ScatterWebSocketServer extends WebSocketServer
 {
@@ -206,10 +207,10 @@ public abstract class ScatterWebSocketServer extends WebSocketServer
     private void onApiTypeRequestSignature(RequestSignatureData data, WebSocket socket)
     {
         final RequestSignatureData.EosPayload eosPayload = data.getEosPayload();
-        final String transaction_id = pushEosTransaction(eosPayload.getTransaction(), eosPayload.getNetwork());
+        final List<String> signatures = signEosTransaction(eosPayload.getTransaction(), eosPayload.getNetwork());
 
         final RequestSignatureResponse response = new RequestSignatureResponse(data.getId());
-        response.setResult(new RequestSignatureResponse.Result(transaction_id));
+        response.setResult(new RequestSignatureResponse.Result(signatures));
 
         try
         {
@@ -236,7 +237,7 @@ public abstract class ScatterWebSocketServer extends WebSocketServer
 
     protected abstract GetOrRequestIdentityResponse.EosAccount getEosAccount();
 
-    protected abstract String pushEosTransaction(EosTransaction transaction, EosNetwork network);
+    protected abstract List<String> signEosTransaction(EosTransaction transaction, EosNetwork network);
 
     protected abstract void onDataError(Exception e);
 

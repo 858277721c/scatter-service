@@ -2,8 +2,11 @@ package com.sd.lib.scatter.service.model.response.api;
 
 import com.sd.lib.scatter.service.json.JsonWriter;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.List;
 
 public class RequestSignatureResponse extends ApiResponse<RequestSignatureResponse.Result>
 {
@@ -14,22 +17,27 @@ public class RequestSignatureResponse extends ApiResponse<RequestSignatureRespon
 
     public static class Result implements JsonWriter
     {
-        private final String transaction_id;
+        private final List<String> signatures;
 
-        public Result(String transaction_id)
+        public Result(List<String> signatures)
         {
-            this.transaction_id = transaction_id;
+            this.signatures = signatures;
         }
 
-        public String getTransaction_id()
+        public List<String> getSignatures()
         {
-            return transaction_id;
+            return signatures;
         }
 
         @Override
         public void write(JSONObject object) throws JSONException
         {
-            object.put("transaction_id", transaction_id);
+            final JSONArray jsonArray = new JSONArray();
+            for (String item : signatures)
+            {
+                jsonArray.put(item);
+            }
+            object.put("signatures", jsonArray);
         }
     }
 

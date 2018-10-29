@@ -74,7 +74,7 @@ public class MainActivity extends AppCompatActivity
                 @Override
                 protected GetOrRequestIdentityResponse.EosAccount getEosAccount()
                 {
-                    return new GetOrRequestIdentityResponse.EosAccount("zjunzjun1234", "active", "EOS76weabiGCBEMemk4nnJRMTPyshEzNBqoYKCWfnMzpVqMauTYCY");
+                    return new GetOrRequestIdentityResponse.EosAccount("ichenfq12345", "active", "EOS8PzaHQ8f7iiGR6ikqMBHXLLEJT1y4NjQ9ZsTKefP1VFYC2LCjx");
                 }
 
                 @Override
@@ -100,7 +100,7 @@ public class MainActivity extends AppCompatActivity
     private TransactionModel toTransactionModel(EosTransaction transaction)
     {
         final TransactionModel model = new TransactionModel();
-        model.setExpiration(RpcUtils.addTime(transaction.getExpiration(), 30 * 1000));
+        model.setExpiration(transaction.getExpiration());
         model.setRef_block_num(transaction.getRef_block_num());
         model.setRef_block_prefix(transaction.getRef_block_prefix());
 

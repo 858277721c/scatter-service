@@ -22,7 +22,6 @@ import com.sd.lib.scatter.service.model.response.api.GetOrRequestIdentityRespons
 import com.sd.lib.webview.FWebView;
 import com.sd.lib.webview.client.FWebViewClient;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity
@@ -105,7 +104,6 @@ public class MainActivity extends AppCompatActivity
         model.setRef_block_num(transaction.getRef_block_num());
         model.setRef_block_prefix(transaction.getRef_block_prefix());
 
-        final List<ActionModel> listAction = new ArrayList<>();
         for (EosAction eosAction : transaction.getActions())
         {
             final ActionModel actionModel = new ActionModel();
@@ -113,20 +111,16 @@ public class MainActivity extends AppCompatActivity
             actionModel.setName(eosAction.getName());
             actionModel.setData(eosAction.getData());
 
-            final List<AuthorizationModel> listAuthor = new ArrayList<>();
             for (EosAuthorization eosAuthorization : eosAction.getAuthorization())
             {
                 final AuthorizationModel authorizationModel = new AuthorizationModel();
                 authorizationModel.setActor(eosAuthorization.getActor());
                 authorizationModel.setPermission(eosAuthorization.getPermission());
-                listAuthor.add(authorizationModel);
+                actionModel.getAuthorization().add(authorizationModel);
             }
-            actionModel.setAuthorization(listAuthor);
 
-            listAction.add(actionModel);
+            model.getActions().add(actionModel);
         }
-
-        model.setActions(listAction);
 
         return model;
     }

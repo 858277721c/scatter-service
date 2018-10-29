@@ -38,6 +38,22 @@ public class ApiData implements JsonReader
         return nextNonce;
     }
 
+    public static class Payload implements JsonReader
+    {
+        private String origin;
+
+        public String getOrigin()
+        {
+            return origin;
+        }
+
+        @Override
+        public void read(JSONObject object) throws JSONException
+        {
+            this.origin = object.optString("origin");
+        }
+    }
+
     @Override
     public void read(JSONObject object) throws JSONException
     {

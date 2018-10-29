@@ -68,6 +68,7 @@ public class RequestSignatureData extends ApiData
         {
             final Payload payload = new Payload();
             payload.read(jsonPayload);
+
             if ("eos".equals(payload.getBlockchain()))
             {
                 final EosPayload eosPayload = new EosPayload();

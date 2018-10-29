@@ -1,7 +1,5 @@
 package com.sd.lib.scatter.service.model.request.api;
 
-import com.sd.lib.scatter.service.json.JsonReader;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -14,20 +12,8 @@ public class IdentityFromPermissionsData extends ApiData
         return payload;
     }
 
-    public static class Payload implements JsonReader
+    public static class Payload extends ApiData.Payload
     {
-        private String origin;
-
-        public String getOrigin()
-        {
-            return origin;
-        }
-
-        @Override
-        public void read(JSONObject object)
-        {
-            this.origin = object.optString("origin");
-        }
     }
 
     @Override
@@ -38,9 +24,8 @@ public class IdentityFromPermissionsData extends ApiData
         final JSONObject jsonPayload = object.optJSONObject("payload");
         if (jsonPayload != null)
         {
-            final Payload payload = new Payload();
-            payload.read(jsonPayload);
-            this.payload = payload;
+            this.payload = new Payload();
+            this.payload.read(jsonPayload);
         }
     }
 }

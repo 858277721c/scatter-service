@@ -16,7 +16,7 @@ public class GetOrRequestIdentityData extends ApiData
         return payload;
     }
 
-    public static class Payload implements JsonReader
+    public static class Payload extends ApiData.Payload
     {
         private Fields fields;
 
@@ -28,12 +28,12 @@ public class GetOrRequestIdentityData extends ApiData
         @Override
         public void read(JSONObject object) throws JSONException
         {
+            super.read(object);
             final JSONObject jsonFields = object.optJSONObject("fields");
             if (jsonFields != null)
             {
-                final Fields fields = new Fields();
-                fields.read(jsonFields);
-                this.fields = fields;
+                this.fields = new Fields();
+                this.fields.read(jsonFields);
             }
         }
     }
@@ -117,13 +117,11 @@ public class GetOrRequestIdentityData extends ApiData
     public void read(JSONObject object) throws JSONException
     {
         super.read(object);
-
         final JSONObject jsonPayload = object.optJSONObject("payload");
         if (jsonPayload != null)
         {
-            final Payload payload = new Payload();
-            payload.read(jsonPayload);
-            this.payload = payload;
+            this.payload = new Payload();
+            this.payload.read(jsonPayload);
         }
     }
 }

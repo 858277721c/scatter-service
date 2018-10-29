@@ -107,6 +107,7 @@ public class Scatterio
     {
         IdentityFromPermissions("identityFromPermissions"),
         GetOrRequestIdentity("getOrRequestIdentity"),
+        ForgetIdentity("forgetIdentity"),
         RequestSignature("requestSignature");
 
         public final String name;

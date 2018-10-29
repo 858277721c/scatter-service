@@ -6,10 +6,12 @@ import com.sd.lib.scatter.service.exception.JsonException;
 import com.sd.lib.scatter.service.model.eos.EosNetwork;
 import com.sd.lib.scatter.service.model.eos.EosTransaction;
 import com.sd.lib.scatter.service.model.request.api.ApiData;
+import com.sd.lib.scatter.service.model.request.api.ForgetIdentityData;
 import com.sd.lib.scatter.service.model.request.api.GetOrRequestIdentityData;
 import com.sd.lib.scatter.service.model.request.api.IdentityFromPermissionsData;
 import com.sd.lib.scatter.service.model.request.api.RequestSignatureData;
 import com.sd.lib.scatter.service.model.response.api.ApiResponse;
+import com.sd.lib.scatter.service.model.response.api.ForgetIdentityResponse;
 import com.sd.lib.scatter.service.model.response.api.GetOrRequestIdentityResponse;
 import com.sd.lib.scatter.service.model.response.api.IdentityFromPermissionsResponse;
 import com.sd.lib.scatter.service.model.response.api.RequestSignatureResponse;
@@ -145,6 +147,11 @@ public abstract class ScatterWebSocketServer extends WebSocketServer
                     requestSignatureData.read(jsonObject);
                     onApiTypeRequestSignature(requestSignatureData, socket);
                     break;
+                case ForgetIdentity:
+                    final ForgetIdentityData forgetIdentityData = new ForgetIdentityData();
+                    forgetIdentityData.read(jsonObject);
+                    onApiTypeForgetIdentity(forgetIdentityData, socket);
+                    break;
                 default:
                     break;
             }
@@ -210,6 +217,20 @@ public abstract class ScatterWebSocketServer extends WebSocketServer
         } catch (JSONException e)
         {
             onDataError(new JsonException("requestSignature response error:" + e));
+        }
+    }
+
+    private void onApiTypeForgetIdentity(ForgetIdentityData data, WebSocket socket)
+    {
+        final ForgetIdentityResponse response = new ForgetIdentityResponse(data.getId());
+        response.setResult("");
+
+        try
+        {
+            new ApiResponser(socket).send(response);
+        } catch (JSONException e)
+        {
+            onDataError(new JsonException("forgetIdentity response error:" + e));
         }
     }
 

@@ -4,6 +4,7 @@ import android.net.http.SslError;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
 import android.webkit.SslErrorHandler;
 import android.webkit.WebView;
 
@@ -26,7 +27,7 @@ import com.sd.lib.webview.client.FWebViewClient;
 
 import org.json.JSONException;
 
-public class MainActivity extends AppCompatActivity
+public class MainActivity extends AppCompatActivity implements View.OnClickListener
 {
     public static final String TAG = MainActivity.class.getSimpleName();
 
@@ -49,8 +50,6 @@ public class MainActivity extends AppCompatActivity
                 handler.proceed();
             }
         });
-
-        getWebSocketServer().start();
     }
 
     private ScatterWebSocketServer getWebSocketServer()
@@ -139,5 +138,35 @@ public class MainActivity extends AppCompatActivity
         }
 
         return model;
+    }
+
+    @Override
+    public void onClick(View v)
+    {
+        switch (v.getId())
+        {
+            case R.id.btn_start:
+                try
+                {
+                    getWebSocketServer().start();
+                } catch (Exception e)
+                {
+                    Log.e(TAG, e.toString());
+                }
+                break;
+            case R.id.btn_stop:
+                try
+                {
+                    if (mWebSocketServer != null)
+                    {
+                        mWebSocketServer.stop();
+                        mWebSocketServer = null;
+                    }
+                } catch (Exception e)
+                {
+                    Log.e(TAG, e.toString());
+                }
+                break;
+        }
     }
 }

@@ -12,17 +12,19 @@ import com.sd.lib.eos.rpc.core.output.model.ActionModel;
 import com.sd.lib.eos.rpc.core.output.model.AuthorizationModel;
 import com.sd.lib.eos.rpc.core.output.model.TransactionModel;
 import com.sd.lib.eos.rpc.core.output.model.TransactionSignResult;
-import com.sd.lib.eos.rpc.utils.RpcUtils;
 import com.sd.lib.scatter.service.ScatterWebSocketServer;
 import com.sd.lib.scatter.service.model.eos.EosAction;
 import com.sd.lib.scatter.service.model.eos.EosAuthorization;
 import com.sd.lib.scatter.service.model.eos.EosNetwork;
 import com.sd.lib.scatter.service.model.eos.EosTransaction;
+import com.sd.lib.scatter.service.model.request.api.GetOrRequestIdentityData;
+import com.sd.lib.scatter.service.model.request.api.RequestSignatureData;
 import com.sd.lib.scatter.service.model.response.api.GetOrRequestIdentityResponse;
+import com.sd.lib.scatter.service.model.response.api.RequestSignatureResponse;
 import com.sd.lib.webview.FWebView;
 import com.sd.lib.webview.client.FWebViewClient;
 
-import java.util.List;
+import org.json.JSONException;
 
 public class MainActivity extends AppCompatActivity
 {
@@ -72,19 +74,33 @@ public class MainActivity extends AppCompatActivity
                 }
 
                 @Override
-                protected GetOrRequestIdentityResponse.EosAccount getEosAccount()
+                protected void onApiGetOrRequestIdentity(GetOrRequestIdentityData data, ApiResponser<GetOrRequestIdentityResponse> responser) throws JSONException
                 {
-                    return new GetOrRequestIdentityResponse.EosAccount("ichenfq12345", "active", "EOS8PzaHQ8f7iiGR6ikqMBHXLLEJT1y4NjQ9ZsTKefP1VFYC2LCjx");
+                    final GetOrRequestIdentityResponse.EosAccount eosAccount = new GetOrRequestIdentityResponse.EosAccount("ichenfq12345", "active", "EOS8PzaHQ8f7iiGR6ikqMBHXLLEJT1y4NjQ9ZsTKefP1VFYC2LCjx");
+
+                    final GetOrRequestIdentityResponse.Result result = new GetOrRequestIdentityResponse.Result();
+                    result.setEosAccount(eosAccount);
+
+                    responser.getResponse().setResult(result);
+                    responser.send();
                 }
 
                 @Override
-                protected List<String> signEosTransaction(EosTransaction transaction, EosNetwork network)
+                protected void onApiRequestSignature(RequestSignatureData data, ScatterWebSocketServer.ApiResponser<RequestSignatureResponse> responser) throws JSONException
                 {
+                    final EosTransaction transaction = data.getEosPayload().getTransaction();
+                    final EosNetwork network = data.getEosPayload().getNetwork();
+
                     final TransactionModel model = toTransactionModel(transaction);
-                    final TransactionSignResult signResult = FEOSManager.getInstance().getTransactionSigner().signTransaction(model, network.getChainId(),
+                    final TransactionSignResult signResult = FEOSManager.getInstance().getTransactionSigner().signTransaction(
+                            model,
+                            network.getChainId(),
                             "");
 
-                    return signResult.getSignatures();
+                    final RequestSignatureResponse.Result result = new RequestSignatureResponse.Result(signResult.getSignatures());
+
+                    responser.getResponse().setResult(result);
+                    responser.send();
                 }
 
                 @Override
@@ -106,20 +122,20 @@ public class MainActivity extends AppCompatActivity
 
         for (EosAction eosAction : transaction.getActions())
         {
-            final ActionModel actionModel = new ActionModel();
-            actionModel.setAccount(eosAction.getAccount());
-            actionModel.setName(eosAction.getName());
-            actionModel.setData(eosAction.getData());
+            final ActionModel newAction = new ActionModel();
+            newAction.setAccount(eosAction.getAccount());
+            newAction.setName(eosAction.getName());
+            newAction.setData(eosAction.getData());
 
             for (EosAuthorization eosAuthorization : eosAction.getAuthorization())
             {
-                final AuthorizationModel authorizationModel = new AuthorizationModel();
-                authorizationModel.setActor(eosAuthorization.getActor());
-                authorizationModel.setPermission(eosAuthorization.getPermission());
-                actionModel.getAuthorization().add(authorizationModel);
+                final AuthorizationModel newAuthorization = new AuthorizationModel();
+                newAuthorization.setActor(eosAuthorization.getActor());
+                newAuthorization.setPermission(eosAuthorization.getPermission());
+                newAction.getAuthorization().add(newAuthorization);
             }
 
-            model.getActions().add(actionModel);
+            model.getActions().add(newAction);
         }
 
         return model;

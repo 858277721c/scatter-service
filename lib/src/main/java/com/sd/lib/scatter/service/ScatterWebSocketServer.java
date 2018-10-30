@@ -3,8 +3,6 @@ package com.sd.lib.scatter.service;
 import android.util.Log;
 
 import com.sd.lib.scatter.service.exception.JsonException;
-import com.sd.lib.scatter.service.model.eos.EosNetwork;
-import com.sd.lib.scatter.service.model.eos.EosTransaction;
 import com.sd.lib.scatter.service.model.request.api.ApiData;
 import com.sd.lib.scatter.service.model.request.api.ForgetIdentityData;
 import com.sd.lib.scatter.service.model.request.api.GetOrRequestIdentityData;
@@ -23,7 +21,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.net.InetSocketAddress;
-import java.util.List;
 
 public abstract class ScatterWebSocketServer extends WebSocketServer
 {
@@ -169,13 +166,12 @@ public abstract class ScatterWebSocketServer extends WebSocketServer
 
     private void onApiTypeIdentityFromPermissions(IdentityFromPermissionsData data, WebSocket socket)
     {
-        final String id = data.getId();
-        final IdentityFromPermissionsResponse response = new IdentityFromPermissionsResponse(id);
-        response.setResult(id);
+        final IdentityFromPermissionsResponse response = new IdentityFromPermissionsResponse(data.getId());
+        response.setResult("true");
 
         try
         {
-            new ApiResponser(socket).send(response);
+            new ApiResponser(response, socket).send();
         } catch (JSONException e)
         {
             onDataError(new JsonException("identityFromPermissions response error:" + e));
@@ -191,18 +187,11 @@ public abstract class ScatterWebSocketServer extends WebSocketServer
             return;
         }
 
-        final GetOrRequestIdentityResponse.EosAccount account = getEosAccount();
-        if (account == null)
-            throw new NullPointerException("EosAccount is null for scatter api getOrRequestIdentity");
-
         final GetOrRequestIdentityResponse response = new GetOrRequestIdentityResponse(data.getId());
-        final GetOrRequestIdentityResponse.Result result = new GetOrRequestIdentityResponse.Result();
-        result.setEosAccount(account);
-        response.setResult(result);
 
         try
         {
-            new ApiResponser(socket).send(response);
+            onApiGetOrRequestIdentity(data, new ApiResponser(response, socket));
         } catch (JSONException e)
         {
             onDataError(new JsonException("getOrRequestIdentity response error:" + e));
@@ -211,15 +200,11 @@ public abstract class ScatterWebSocketServer extends WebSocketServer
 
     private void onApiTypeRequestSignature(RequestSignatureData data, WebSocket socket)
     {
-        final RequestSignatureData.EosPayload eosPayload = data.getEosPayload();
-        final List<String> signatures = signEosTransaction(eosPayload.getTransaction(), eosPayload.getNetwork());
-
         final RequestSignatureResponse response = new RequestSignatureResponse(data.getId());
-        response.setResult(new RequestSignatureResponse.Result(signatures));
 
         try
         {
-            new ApiResponser(socket).send(response);
+            onApiRequestSignature(data, new ApiResponser(response, socket));
         } catch (JSONException e)
         {
             onDataError(new JsonException("requestSignature response error:" + e));
@@ -233,16 +218,30 @@ public abstract class ScatterWebSocketServer extends WebSocketServer
 
         try
         {
-            new ApiResponser(socket).send(response);
+            new ApiResponser(response, socket).send();
         } catch (JSONException e)
         {
             onDataError(new JsonException("forgetIdentity response error:" + e));
         }
     }
 
-    protected abstract GetOrRequestIdentityResponse.EosAccount getEosAccount();
+    /**
+     * 登录
+     *
+     * @param data
+     * @param responser
+     * @throws JSONException
+     */
+    protected abstract void onApiGetOrRequestIdentity(GetOrRequestIdentityData data, ApiResponser<GetOrRequestIdentityResponse> responser) throws JSONException;
 
-    protected abstract List<String> signEosTransaction(EosTransaction transaction, EosNetwork network);
+    /**
+     * 签名
+     *
+     * @param data
+     * @param responser
+     * @throws JSONException
+     */
+    protected abstract void onApiRequestSignature(RequestSignatureData data, ApiResponser<RequestSignatureResponse> responser) throws JSONException;
 
     protected abstract void onDataError(Exception e);
 
@@ -252,19 +251,29 @@ public abstract class ScatterWebSocketServer extends WebSocketServer
         socket.send(response);
     }
 
-    private final class ApiResponser
+    public final class ApiResponser<T extends ApiResponse>
     {
+        private final T mResponse;
         private final WebSocket mSocket;
 
-        public ApiResponser(WebSocket socket)
+        public ApiResponser(T response, WebSocket socket)
         {
+            if (response == null || socket == null)
+                throw new NullPointerException();
+
+            mResponse = response;
             mSocket = socket;
         }
 
-        public void send(ApiResponse response) throws JSONException
+        public T getResponse()
+        {
+            return mResponse;
+        }
+
+        public void send() throws JSONException
         {
             final JSONObject jsonObject = new JSONObject();
-            response.write(jsonObject);
+            mResponse.write(jsonObject);
 
             final String json = jsonObject.toString();
             final String responseString = Scatterio.toResponse(json, Scatterio.DataType.Api);

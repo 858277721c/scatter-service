@@ -1,7 +1,10 @@
 package com.sd.lib.scatter.service;
 
+import com.sd.lib.scatter.service.exception.IllegalRequestEventException;
+
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 public class Scatterio
 {
@@ -15,7 +18,7 @@ public class Scatterio
      * @return
      * @throws JSONException
      */
-    public static Request toRequest(String message) throws JSONException
+    public static Request toRequest(String message) throws JSONException, IllegalRequestEventException
     {
         if (message == null || message.isEmpty())
             return null;
@@ -27,17 +30,20 @@ public class Scatterio
 
         final String data = message.substring(msgEventPrefix.length());
         if (data == null || data.isEmpty())
-            return null;
+            throw new IllegalRequestEventException("event data was not found:" + message);
 
         final JSONArray jsonArray = new JSONArray(data);
         if (jsonArray.length() != 2)
-            return null;
+            throw new IllegalRequestEventException("event data format is incorrect:" + message);
 
         final DataType dataType = DataType.from(jsonArray.optString(0));
         if (dataType == null)
             return null;
 
         final String dataJson = jsonArray.optString(1);
+        if (dataJson == null || dataJson.isEmpty())
+            throw new IllegalRequestEventException("event data is empty:" + message);
+
         return new Request(dataType, dataJson);
     }
 
@@ -69,12 +75,29 @@ public class Scatterio
     public static class Request
     {
         public final DataType dataType;
-        public final String dataJson;
+        public final Data data;
 
-        public Request(DataType dataType, String dataJson)
+        public Request(DataType dataType, String dataJson) throws JSONException
         {
             this.dataType = dataType;
-            this.dataJson = dataJson;
+
+            final JSONObject jsonObject = new JSONObject(dataJson);
+            final String json = jsonObject.getString("data");
+            final String plugin = jsonObject.getString("plugin");
+
+            this.data = new Data(json, plugin);
+        }
+
+        public static class Data
+        {
+            public final String json;
+            public final String plugin;
+
+            public Data(String json, String plugin)
+            {
+                this.json = json;
+                this.plugin = plugin;
+            }
         }
     }
 

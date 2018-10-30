@@ -2,13 +2,14 @@ package com.sd.lib.scatter.service;
 
 import android.util.Log;
 
+import com.sd.lib.scatter.service.exception.IllegalRequestEventException;
 import com.sd.lib.scatter.service.exception.JsonException;
-import com.sd.lib.scatter.service.exception.NullApiResponseException;
 import com.sd.lib.scatter.service.model.request.api.ApiData;
 import com.sd.lib.scatter.service.model.request.api.ForgetIdentityData;
 import com.sd.lib.scatter.service.model.request.api.GetOrRequestIdentityData;
 import com.sd.lib.scatter.service.model.request.api.IdentityFromPermissionsData;
 import com.sd.lib.scatter.service.model.request.api.RequestSignatureData;
+import com.sd.lib.scatter.service.model.request.pair.PairData;
 import com.sd.lib.scatter.service.model.response.api.ApiResponse;
 import com.sd.lib.scatter.service.model.response.api.ForgetIdentityResponse;
 import com.sd.lib.scatter.service.model.response.api.GetOrRequestIdentityResponse;
@@ -22,11 +23,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.net.InetSocketAddress;
+import java.util.HashMap;
+import java.util.Map;
 
 public abstract class ScatterWebSocketServer extends WebSocketServer
 {
     private static final String TAG = ScatterWebSocketServer.class.getSimpleName();
 
+    private final Map<WebSocket, WebSocketInfo> mMapSocket = new HashMap<>();
     private boolean mIsStarted;
 
     public ScatterWebSocketServer()
@@ -49,6 +53,7 @@ public abstract class ScatterWebSocketServer extends WebSocketServer
     public void onClose(WebSocket conn, int code, String reason, boolean remote)
     {
         Log.i(TAG, "onClose:" + code + " " + reason + " " + remote);
+        mMapSocket.remove(conn);
     }
 
     @Override
@@ -62,31 +67,34 @@ public abstract class ScatterWebSocketServer extends WebSocketServer
             return;
         }
 
+        Scatterio.Request request = null;
+
         try
         {
-            final Scatterio.Request request = Scatterio.toRequest(message);
-            if (request == null)
-                return;
+            request = Scatterio.toRequest(message);
+        } catch (JSONException e)
+        {
+            onDataError(new JsonException("parse message error:" + e));
+        } catch (IllegalRequestEventException e)
+        {
+            onDataError(e);
+        }
 
+        if (request != null)
+        {
             switch (request.dataType)
             {
                 case Pair:
-                    sendResponse(Scatterio.toResponse("true", Scatterio.DataType.Pair), conn);
+                    onDataPair(request.data, conn);
                     break;
 
                 case Api:
-                    final String json = new JSONObject(request.dataJson).getString("data");
-                    onDataApi(json, conn);
+                    onDataApi(request.data, conn);
                     break;
 
                 default:
                     break;
             }
-
-        } catch (JSONException e)
-        {
-            onDataError(new JsonException("parse message error:" + e));
-            return;
         }
     }
 
@@ -105,13 +113,44 @@ public abstract class ScatterWebSocketServer extends WebSocketServer
     }
 
     /**
-     * api数据
+     * pair数据
      *
-     * @param json
+     * @param data
      * @param socket
      */
-    private void onDataApi(String json, WebSocket socket)
+    private void onDataPair(Scatterio.Request.Data data, WebSocket socket)
     {
+        final String json = data.json;
+        final PairData pairData = new PairData();
+        try
+        {
+            pairData.read(new JSONObject(json));
+        } catch (JSONException e)
+        {
+            onDataError(new JsonException("parse pair data error:" + e));
+            return;
+        }
+
+        if (pairData.isPassthrough())
+        {
+            final WebSocketInfo info = new WebSocketInfo();
+            info.setAppkey(pairData.getAppkey());
+            mMapSocket.put(socket, info);
+        }
+
+        sendResponse(Scatterio.toResponse("true", Scatterio.DataType.Pair), socket);
+    }
+
+    /**
+     * api数据
+     *
+     * @param data
+     * @param socket
+     */
+    private void onDataApi(Scatterio.Request.Data data, WebSocket socket)
+    {
+        final String json = data.json;
+
         try
         {
             final JSONObject jsonObject = new JSONObject(json);
@@ -274,7 +313,7 @@ public abstract class ScatterWebSocketServer extends WebSocketServer
         public void send() throws JSONException
         {
             if (mResponse.getResult() == null)
-                throw new NullApiResponseException("api response result is null");
+                throw new RuntimeException("api response result is null");
 
             final JSONObject jsonObject = new JSONObject();
             mResponse.write(jsonObject);
@@ -282,6 +321,32 @@ public abstract class ScatterWebSocketServer extends WebSocketServer
             final String json = jsonObject.toString();
             final String responseString = Scatterio.toResponse(json, Scatterio.DataType.Api);
             sendResponse(responseString, mSocket);
+        }
+    }
+
+    private static class WebSocketInfo
+    {
+        private String appkey;
+        private String nextNonce;
+
+        public String getAppkey()
+        {
+            return appkey;
+        }
+
+        public void setAppkey(String appkey)
+        {
+            this.appkey = appkey;
+        }
+
+        public String getNextNonce()
+        {
+            return nextNonce;
+        }
+
+        public void setNextNonce(String nextNonce)
+        {
+            this.nextNonce = nextNonce;
         }
     }
 }

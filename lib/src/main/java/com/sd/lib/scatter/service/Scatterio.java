@@ -5,8 +5,8 @@ import org.json.JSONException;
 
 public class Scatterio
 {
-    public static final String MSG_PREFIX = "42/scatter,";
     public static final String MSG_CONNECT = "40/scatter";
+    public static final String MSG_EVENT = "42/scatter";
 
     /**
      * 解析请求消息
@@ -20,10 +20,12 @@ public class Scatterio
         if (message == null || message.isEmpty())
             return null;
 
-        if (!message.startsWith(MSG_PREFIX))
+        final String msgEventPrefix = MSG_EVENT + ",";
+
+        if (!message.startsWith(msgEventPrefix))
             return null;
 
-        final String data = message.substring(MSG_PREFIX.length());
+        final String data = message.substring(msgEventPrefix.length());
         if (data == null || data.isEmpty())
             return null;
 
@@ -42,13 +44,14 @@ public class Scatterio
     /**
      * 转为应答消息
      *
-     * @param json
+     * @param content
      * @param dataType
      * @return
      */
-    public static String toResponse(String json, DataType dataType)
+    public static String toResponse(String content, DataType dataType)
     {
-        final StringBuilder sb = new StringBuilder(MSG_PREFIX);
+        final StringBuilder sb = new StringBuilder(MSG_EVENT);
+        sb.append(",");
         sb.append("[");
         sb.append("\"");
         sb.append(dataType.name);
@@ -57,7 +60,7 @@ public class Scatterio
         sb.append("\"");
 
         sb.append(",");
-        sb.append(json);
+        sb.append(content);
         sb.append("]");
 
         return sb.toString();

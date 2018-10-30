@@ -73,7 +73,7 @@ public abstract class ScatterWebSocketServer extends WebSocketServer
             switch (request.dataType)
             {
                 case Pair:
-                    sendResponse(Scatterio.toResponse(request.dataJson, request.dataType), conn);
+                    sendResponse(Scatterio.toResponse("true", Scatterio.DataType.Pair), conn);
                     break;
 
                 case Api:

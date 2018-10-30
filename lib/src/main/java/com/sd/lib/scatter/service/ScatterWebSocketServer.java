@@ -60,7 +60,7 @@ public abstract class ScatterWebSocketServer extends WebSocketServer
 
         if (message.startsWith(Scatterio.MSG_CONNECT))
         {
-            conn.send(Scatterio.MSG_CONNECT);
+            sendResponse(Scatterio.MSG_CONNECT, conn);
             return;
         }
 
@@ -229,7 +229,7 @@ public abstract class ScatterWebSocketServer extends WebSocketServer
     private void onApiTypeForgetIdentity(ForgetIdentityData data, WebSocket socket)
     {
         final ForgetIdentityResponse response = new ForgetIdentityResponse(data.getId());
-        response.setResult("");
+        response.setResult("true");
 
         try
         {

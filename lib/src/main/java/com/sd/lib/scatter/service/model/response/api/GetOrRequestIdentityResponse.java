@@ -56,6 +56,8 @@ public class GetOrRequestIdentityResponse extends ApiResponse<GetOrRequestIdenti
 
         public Account(String blockchain)
         {
+            if (blockchain == null || blockchain.isEmpty())
+                throw new NullPointerException("blockchain is null");
             this.blockchain = blockchain;
         }
 

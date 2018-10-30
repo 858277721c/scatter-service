@@ -98,6 +98,12 @@ public class Scatterio
                 this.json = json;
                 this.plugin = plugin;
             }
+
+            @Override
+            public String toString()
+            {
+                return plugin + "," + json;
+            }
         }
     }
 

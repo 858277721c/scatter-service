@@ -15,6 +15,7 @@ import com.sd.lib.scatter.service.model.response.api.ForgetIdentityResponse;
 import com.sd.lib.scatter.service.model.response.api.GetOrRequestIdentityResponse;
 import com.sd.lib.scatter.service.model.response.api.IdentityFromPermissionsResponse;
 import com.sd.lib.scatter.service.model.response.api.RequestSignatureResponse;
+import com.sd.lib.scatter.service.utils.Sha256;
 
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
@@ -173,6 +174,24 @@ public abstract class ScatterWebSocketServer extends WebSocketServer
                 return;
             }
 
+            final WebSocketInfo oldInfo = mMapSocket.get(socket);
+            if (oldInfo == null)
+            {
+                onDataError(new RuntimeException("api request was not paired before:" + data));
+                return;
+            }
+
+            if (apiType != Scatterio.ApiType.IdentityFromPermissions)
+            {
+                if (!checkNonce(apiData, oldInfo))
+                {
+                    onDataError(new RuntimeException("Illegal api request check nonce failed:" + data));
+                    return;
+                }
+            }
+            oldInfo.setNextNonce(apiData.getNextNonce());
+
+
             switch (apiType)
             {
                 case IdentityFromPermissions:
@@ -202,6 +221,13 @@ public abstract class ScatterWebSocketServer extends WebSocketServer
         {
             onDataError(new JsonException("parse api data error:" + e));
         }
+    }
+
+    private boolean checkNonce(ApiData apiData, WebSocketInfo oldInfo)
+    {
+        final String apiNonce = Sha256.sha(apiData.getNonce());
+        final String savedNextNonce = oldInfo.getNextNonce();
+        return savedNextNonce.equals(apiNonce);
     }
 
     private void onApiTypeIdentityFromPermissions(IdentityFromPermissionsData data, WebSocket socket)

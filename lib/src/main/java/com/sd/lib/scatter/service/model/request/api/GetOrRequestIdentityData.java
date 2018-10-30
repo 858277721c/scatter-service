@@ -61,9 +61,8 @@ public class GetOrRequestIdentityData extends ApiData
 
                     if ("eos".equals(item.optString("blockchain")))
                     {
-                        final EosAccount account = new EosAccount();
-                        account.read(item);
-                        this.eosAccount = account;
+                        this.eosAccount = new EosAccount();
+                        this.eosAccount.read(item);
                         break;
                     }
                 }

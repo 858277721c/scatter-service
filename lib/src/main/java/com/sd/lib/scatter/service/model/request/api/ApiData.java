@@ -1,15 +1,15 @@
 package com.sd.lib.scatter.service.model.request.api;
 
 import com.sd.lib.scatter.service.json.JsonReader;
+import com.sd.lib.scatter.service.model.request.RequestData;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class ApiData implements JsonReader
+public class ApiData extends RequestData
 {
     private String type;
     private String id;
-    private String appkey;
     private String nonce;
     private String nextNonce;
 
@@ -21,11 +21,6 @@ public class ApiData implements JsonReader
     public String getId()
     {
         return id;
-    }
-
-    public String getAppkey()
-    {
-        return appkey;
     }
 
     public String getNonce()
@@ -50,17 +45,17 @@ public class ApiData implements JsonReader
         @Override
         public void read(JSONObject object) throws JSONException
         {
-            this.origin = object.optString("origin");
+            this.origin = object.getString("origin");
         }
     }
 
     @Override
     public void read(JSONObject object) throws JSONException
     {
-        this.type = object.optString("type");
-        this.id = object.optString("id");
-        this.appkey = object.optString("appkey");
-        this.nonce = object.optString("nonce");
-        this.nextNonce = object.optString("nextNonce");
+        super.read(object);
+        this.type = object.getString("type");
+        this.id = object.getString("id");
+        this.nonce = object.getString("nonce");
+        this.nextNonce = object.getString("nextNonce");
     }
 }

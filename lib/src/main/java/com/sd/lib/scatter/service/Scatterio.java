@@ -6,6 +6,7 @@ import org.json.JSONException;
 public class Scatterio
 {
     public static final String MSG_PREFIX = "42/scatter,";
+    public static final String MSG_CONNECT = "40/scatter";
 
     /**
      * 解析请求消息

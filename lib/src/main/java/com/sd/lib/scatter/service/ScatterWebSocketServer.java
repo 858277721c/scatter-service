@@ -45,7 +45,6 @@ public abstract class ScatterWebSocketServer extends WebSocketServer
     public void onOpen(WebSocket conn, ClientHandshake handshake)
     {
         Log.i(TAG, "onOpen");
-        conn.send("40/scatter");
     }
 
     @Override
@@ -58,6 +57,12 @@ public abstract class ScatterWebSocketServer extends WebSocketServer
     public final void onMessage(WebSocket conn, String message)
     {
         Log.i(TAG, "----->:" + message);
+
+        if (message.startsWith(Scatterio.MSG_CONNECT))
+        {
+            conn.send(Scatterio.MSG_CONNECT);
+            return;
+        }
 
         try
         {

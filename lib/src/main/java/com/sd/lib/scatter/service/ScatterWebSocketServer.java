@@ -3,6 +3,7 @@ package com.sd.lib.scatter.service;
 import android.util.Log;
 
 import com.sd.lib.scatter.service.exception.JsonException;
+import com.sd.lib.scatter.service.exception.NullApiResponseException;
 import com.sd.lib.scatter.service.model.request.api.ApiData;
 import com.sd.lib.scatter.service.model.request.api.ForgetIdentityData;
 import com.sd.lib.scatter.service.model.request.api.GetOrRequestIdentityData;
@@ -272,6 +273,9 @@ public abstract class ScatterWebSocketServer extends WebSocketServer
 
         public void send() throws JSONException
         {
+            if (mResponse.getResult() == null)
+                throw new NullApiResponseException("api response result is null");
+
             final JSONObject jsonObject = new JSONObject();
             mResponse.write(jsonObject);
 
